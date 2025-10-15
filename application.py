@@ -72,6 +72,7 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
         user_requirement = "真实电影风格，不要超过10句对话,一定要要保持人物一致性，参考生成的图片,面向短剧用户"
         style = "真实电影风格"
         if(len(prompt) > 100):
+            print("Using Script to video")
             chat_model = init_chat_model(
                 model="claude-sonnet-4-5-20250929",  # claude-sonnet-4-5-20250929
                 api_key="sk-RsgJVQohu9e1HBMgdYsy9mQFKs3ue4fZXL2iGMjiiupiViQB",
@@ -81,7 +82,7 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
             image_generator = DoubaoSeedreamImageGenerator(
                 api_key="sk-RsgJVQohu9e1HBMgdYsy9mQFKs3ue4fZXL2iGMjiiupiViQB",
             )
-            video_generator = DoubaoSeedanceVideoGenerator(
+            video_generator = VeoVideoGenerator(
                 api_key="sk-RsgJVQohu9e1HBMgdYsy9mQFKs3ue4fZXL2iGMjiiupiViQB",
             )
             pipeline = Script2VideoPipeline(
@@ -98,6 +99,7 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
                 )
             )
         else:
+            print("Using Idea to video")
             chat_model = init_chat_model(
                 model="claude-sonnet-4-5-20250929",
                 api_key="sk-RsgJVQohu9e1HBMgdYsy9mQFKs3ue4fZXL2iGMjiiupiViQB",
