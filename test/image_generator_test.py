@@ -1,0 +1,154 @@
+import os
+import asyncio
+from PIL import Image
+from tools.image_generator.nanobanana import NanoBananaImageGenerator
+from tools.image_generator.gemini import GeminiImageGenerator
+from tools.image_generator.gpt4o import GPT4oImageGenerator
+from tools.image_generator.doubao_seedream import DoubaoSeedreamImageGenerator
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
+api_key = "sk-7Z55m4gaQXFmvL2jbGqW6CWb0kMiDQe1qkutjeTsxbVTodwY"
+base_url = "https://yunwu.ai"
+
+# prompt = r"生成一张大树的图片，电影真实风格"
+
+# prompt = "A cute magical cat, digital art, watching the stars, running on the beach."
+# reference_image_paths = ["example_inputs/images/魔法猫咪.png"]
+
+# prompt = "Two cute cats, digital art, watching the stars, running on the beach. One refers to the first image, the other refers to the second image."
+prompt = "Two cute cats are fighting with each other. One fights like a brave knight, the other fights like a ninja. The brave knight cat wears shining armor and holds a sword and shield, while the ninja cat wears a black ninja outfit and holds sharp throwing stars. They are in a dynamic battle pose, with intense expressions on their faces. The background is a dramatic battlefield with swirling dust and flying debris, capturing the excitement of their epic showdown. Digital art, high detail, vibrant colors. One cat refers to the first image, the other cat refers to the second image."
+# prompt = "生成3张女孩和奶牛玩偶在游乐园开心地坐过山车的图片，涵盖早晨、中午、晚上。"
+# reference_image_paths = [
+#     "example_inputs/images/seedream4_imagesToimages_1.png",
+#     "example_inputs/images/seedream4_imagesToimages_2.png"
+# ]
+
+reference_image_paths = [
+    "example_inputs/images/魔法猫咪.png",
+    "example_inputs/images/小八.png"
+]
+
+# save_prefix = "example_inputs/images/gpt4o_output"
+# image_generator = GPT4oImageGenerator(
+#     api_key=api_key,
+#     base_url=base_url,
+#     model="gpt-image-1-all",
+# )
+
+# save_prefix = "example_inputs/images/gemini_output"
+# image_generator = GeminiImageGenerator(
+#     api_key=api_key,
+#     base_url=base_url,
+#     model="gemini-2.5-flash-image-preview",
+# )
+
+save_prefix = "example_inputs/images/nanobanana_output"
+image_generator = NanoBananaImageGenerator(
+    api_key=api_key,
+    base_url=base_url,
+    model="nano-banana",
+)
+
+# save_prefix = "example_inputs/images/doubao_seedream_output"
+# image_generator = DoubaoSeedreamImageGenerator(
+#     api_key=api_key,
+#     model="doubao-seedream-4-0-250828",
+# )
+
+image = asyncio.run(
+    image_generator.generate_single_image(
+        prompt=prompt,
+        reference_image_paths=reference_image_paths,
+        size="1600x1024",
+    )
+)
+os.makedirs(save_prefix, exist_ok=True)
+# save_path = f"{save_prefix}/tree.png"
+# save_path = f"{save_prefix}/girl_and_cow.png"
+# save_path = f"{save_prefix}/magical_cat.png"
+save_path = f"{save_prefix}/cat_fight.png"
+image.save(save_path)
+
+
+
+
+import os
+import asyncio
+from PIL import Image
+from tools.image_generator.nanobanana import NanoBananaImageGenerator
+from tools.image_generator.gemini import GeminiImageGenerator
+from tools.image_generator.gpt4o import GPT4oImageGenerator
+from tools.image_generator.doubao_seedream import DoubaoSeedreamImageGenerator
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
+api_key = "sk-7Z55m4gaQXFmvL2jbGqW6CWb0kMiDQe1qkutjeTsxbVTodwY"
+base_url = "https://yunwu.ai"
+
+
+# prompt = "模拟当前图片的第一视角，拍摄森林小道，阳光透过树叶洒在地面上，树木高大茂密，营造出宁静而神秘的氛围。"
+# prompt = "模拟当前图片的过肩视角，女孩的头发、肩膀和部分背部入镜，作为前景，拍摄森林小道，阳光透过树叶洒在地面上，树木高大茂密，营造出宁静而神秘的氛围。"
+# prompt = "模拟当前图片的侧面视角，女孩的侧脸、头发、肩膀和部分背部入镜，作为前景，拍摄森林小道，阳光透过树叶洒在地面上，树木高大茂密，营造出宁静而神秘的氛围。"
+
+# reference_image_paths = [
+#     r"example_inputs\images\女孩.png",
+# ]
+
+
+# prompt = "模拟图片中戴高帽男人的第一视角，拍摄台上的2个红卫兵以及台下的观众，红卫兵穿着红色制服，头戴红卫兵帽，神情严肃，观众在台下义愤填膺，营造出热烈的批斗氛围。"
+# prompt = "模拟图片中右下角红卫兵的过肩视角，拍摄图片中心的戴高帽男人"
+
+# reference_image_paths = [
+#     r"example_inputs\images\批斗.png",
+# ]
+
+# prompt = "模拟图片中白色衣服男人的过肩视角，拍摄图中的小女孩和黑色衣服男人，白色衣服男人的头发、肩膀和部分背部入镜，作为前景，黑色衣服男人面对着镜头说话，背景是图片中右侧的货架。"
+# prompt = "模拟图片中黑色衣服男人的过肩视角，将镜头聚焦于黑色衣服男人，拍摄他面对着镜头说话，背景是图片中便利店门口的货架。"
+
+# reference_image_paths = [
+#     r"example_inputs/images/便利店三人.png",
+# ]
+
+# prompt = "模拟图片中妈妈的侧面视角，拍摄小女孩和背景中的房间布置。妈妈的头发、肩膀入镜，坐在沙发上；小女孩手里拿着牌子，趴在沙发后面，笑容灿烂；沙发扶手侧对着镜头，背景是粉色气球和墙上的装饰。"
+
+# reference_image_paths = [
+#     r"example_inputs\images\妈妈和女儿.png",
+# ]
+
+
+
+prompt = "模拟图片中门口男人的第一视角，看向图中右下角的女人"
+
+reference_image_paths = [
+    r"example_inputs/images/办公室.png",
+]
+
+
+# save_prefix = "example_inputs/images/nanobanana_output"
+# image_generator = NanoBananaImageGenerator(
+#     api_key=api_key,
+#     base_url=base_url,
+#     model="nano-banana",
+# )
+
+save_prefix = "example_inputs/images/gemini_output"
+image_generator = GeminiImageGenerator(
+    api_key=api_key,
+    base_url=base_url,
+    model="gemini-2.5-flash-image-preview",
+)
+
+
+image = asyncio.run(
+    image_generator.generate_single_image(
+        prompt=prompt,
+        reference_image_paths=reference_image_paths,
+        # size="1600x1024",
+    )
+)
+os.makedirs(save_prefix, exist_ok=True)
+save_path = f"{save_prefix}/办公室_new_viewpoint.png"
+image.save(save_path)
