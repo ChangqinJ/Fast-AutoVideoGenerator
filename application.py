@@ -26,13 +26,15 @@ def genVideo(package,dbpool):
 
         with open(f".working_dir/{task_uuid}/prompt.txt", "r", encoding="utf-8") as f:
             prompt_d = f.read()
-
-        Pipeline(pack_id=package["movie_agent_pack_id"],prompt=prompt_d,task_uuid=task_uuid,output_path=output_path)
+        try:
+            Pipeline(pack_id=package["movie_agent_pack_id"],prompt=prompt_d,task_uuid=task_uuid,output_path=output_path)
+        except Exception as e:
+            logging.error(f"发生异常: {e}")
+            return (id, str(e))
         return (id,None)
     except Exception as e:
         logging.error(f"发生异常： {e}")
         return (id, str(e))
-
 
 
 def Pipeline(pack_id,prompt,task_uuid,output_path):
@@ -68,8 +70,8 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
         shutil.copy2(f".working_dir/{task_uuid}/final_video.mp4",user_output_path)
         #shutil.copy2(cover_path,output_path)
         print(f"☑️ Copy created in project root: {user_output_path}")
-    elif(pack_id == 2):
-        user_requirement = "真实电影风格，不要超过10句对话,一定要要保持人物一致性，参考生成的图片,面向短剧用户"
+    elif(pack_id >= 2):
+        user_requirement = "真实电影风格，不要超过10句对话,一定要要保持人物一致性，只要1个scene,参考生成的图片,面向短剧用户,the number of shots should not over 5!the number of shots should not over 5!the number of shots should not over 5!"
         style = "真实电影风格"
         if(len(prompt) > 100):
             print("Using Script to video")
@@ -98,6 +100,11 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
                     style=style,
                 )
             )
+            user_output_path = os.path.join(output_path,"final_video.mp4")
+            cover_path = f".working_dir/{task_uuid}/shots/0/first_frame.png"
+            shutil.copy2(f".working_dir/{task_uuid}/final_video.mp4",user_output_path)
+            shutil.copy2(cover_path,output_path)
+            print(f"☑️ Copy created in project root: {user_output_path}")
         else:
             print("Using Idea to video")
             chat_model = init_chat_model(
@@ -108,11 +115,11 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
             )
 
 
-            image_generator = GeminiImageGenerator(
+            image_generator = DoubaoSeedreamImageGenerator(
                 api_key="sk-RsgJVQohu9e1HBMgdYsy9mQFKs3ue4fZXL2iGMjiiupiViQB",
-                base_url="https://yunwu.ai",
-                api_version="v1beta",
-                model="gemini-2.5-flash-image-preview",
+                # base_url="https://yunwu.ai",
+                # api_version="v1beta",
+                # model="gemini-2.5-flash-image-preview",
             )
             video_generator = VeoVideoGenerator(
                 api_key="sk-RsgJVQohu9e1HBMgdYsy9mQFKs3ue4fZXL2iGMjiiupiViQB",
@@ -124,11 +131,11 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
                 working_dir=f".working_dir/{task_uuid}",
             )
             asyncio.run(
-                pipeline(idea=prompt+"   the number of shots should not over 3", user_requirement=user_requirement, style=style)
+                pipeline(idea=prompt, user_requirement=user_requirement, style=style)
             )
 
-        user_output_path = os.path.join(output_path,"final_video.mp4")
-        cover_path = f".working_dir/{task_uuid}/shots/0/first_frame.png"
-        shutil.copy2(f".working_dir/{task_uuid}/final_video.mp4",user_output_path)
-        shutil.copy2(cover_path,output_path)
-        print(f"☑️ Copy created in project root: {user_output_path}")
+            user_output_path = os.path.join(output_path,"final_video.mp4")
+            cover_path = f".working_dir/{task_uuid}/scene_0/shots/0/first_frame.png"
+            shutil.copy2(f".working_dir/{task_uuid}/final_video.mp4",user_output_path)
+            shutil.copy2(cover_path,output_path)
+            print(f"☑️ Copy created in project root: {user_output_path}")
