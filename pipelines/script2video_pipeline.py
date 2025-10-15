@@ -346,13 +346,13 @@ class Script2VideoPipeline:
             print(f"🚀 Skipped generating video for shot {shot_description.idx}, already exists.")
         else:
             await self.frame_events[shot_description.idx]["first_frame"].wait()
-            if shot_description.variation_type in ["medium", "large"]:
-                await self.frame_events[shot_description.idx]["last_frame"].wait()
+            # if shot_description.variation_type in ["medium", "large"]:
+            #     await self.frame_events[shot_description.idx]["last_frame"].wait()
 
             frame_paths = []
             frame_paths.append(os.path.join(self.working_dir, "shots", f"{shot_description.idx}", "first_frame.png"))
-            if shot_description.variation_type in ["medium", "large"]:
-                frame_paths.append(os.path.join(self.working_dir, "shots", f"{shot_description.idx}", "last_frame.png"))
+            # if shot_description.variation_type in ["medium", "large"]:
+            #     frame_paths.append(os.path.join(self.working_dir, "shots", f"{shot_description.idx}", "last_frame.png"))
 
             print(f"🎬 Starting video generation for shot {shot_description.idx}...")
             video_output = await self.video_generator.generate_single_video(
