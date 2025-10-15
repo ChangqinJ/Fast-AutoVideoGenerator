@@ -1,0 +1,15 @@
+{
+"host": "127.0.0.1", 
+"port": 3306, 
+"user": "root",
+"password": "tkp040629", 
+"db": "esports", 
+"max_connections": 10, 
+"output_path": "C:/Users/TAN/Desktop/ubuntuServer/Server_thread/test_output", 
+"log_path": "C:/Users/TAN/Desktop/ubuntuServer/Server_thread/logging_dir/log.txt",
+"time_interval": 120,
+"max_retry_times": 5,
+"timed_reconnect": false,
+"autocommit": false
+}
+
