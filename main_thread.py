@@ -94,43 +94,81 @@ class main_thread:
     从数据库中找到特定数量的state=0的记录并添加到queue中, 并更新state为1
     '''
     rows = []
+    conn = None
+    cursor = None
     try:
-      self.conn = self.dbpool.get_connection()
-      Dcursor = self.conn.cursor()
-      # 找到全部state=0的记录, 并限制返回数量
-      sql = 'select * from movie_agent_tasks where state = 0 limit %s'
+      # 每次获取新的连接，避免事务状态问题
+      conn = self.dbpool.get_connection()
+      cursor = conn.cursor()
+      
+      # 设置事务隔离级别为READ COMMITTED，确保能看到其他事务已提交的数据
+      cursor.execute("SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED")
+      
+      #弱点: 不熟悉数据库的事务和锁机制
+      
+      # 使用原子操作：先更新再查询，避免竞态条件
+      # 使用FOR UPDATE SKIP LOCKED来避免锁定冲突
+      sql = '''
+      SELECT * FROM movie_agent_tasks 
+      WHERE state = 0 
+      ORDER BY id 
+      LIMIT %s 
+      FOR UPDATE SKIP LOCKED
+      '''
       args = (ub,)
-      status = retry_execute(Dcursor,self.logging_path,sql,args,self.max_retry_times)
+      
+      status = retry_execute(cursor, self.logging_path, sql, args, self.max_retry_times)
       if status == False:
         raise Exception('Error in fetch_status0:retry_execute(sql,args) for finding rows with state=0')
-      rows = list(Dcursor.fetchall())
+      
+      rows = list(cursor.fetchall())
       print('--------------------------------------------------------rows size:',len(rows))
+      
       if len(rows) > 0:
+        # 立即更新这些记录的状态为1
         placeholders = ','.join(['%s'] * len(rows))
-        sql = f'update movie_agent_tasks set state = 1 where id in ({placeholders})'
+        sql = f'UPDATE movie_agent_tasks SET state = 1 WHERE id IN ({placeholders})'
         args = tuple(row['id'] for row in rows)
-        res = retry_execute(Dcursor,self.logging_path,sql,args,self.max_retry_times)
+        
+        res = retry_execute(cursor, self.logging_path, sql, args, self.max_retry_times)
         if res == False:
-          if self.conn:
-            self.conn.rollback()
+          conn.rollback()
           raise Exception("Retry failed, error in fetch_status0:retry_execute(sql,args), update state to 1")
         else:
-          self.conn.commit()
+          conn.commit()
+          simple_log.log(f'Successfully updated {len(rows)} tasks from state=0 to state=1', log_path=self.logging_path)
           
       else: #测试语句, 正式调试时删除
         print('no rows to update')
         time.sleep(5)
+      
       idlist = []
       if len(rows) > 0:
         for row in rows:
           self.queue.put(row)
           idlist.append(row['id'])
+      
       return idlist
+      
     except Exception as e:
+      simple_log.log(f'Error in fetch_status0: {str(e)}', log_path=self.logging_path)
+      if conn:
+        try:
+          conn.rollback()
+        except:
+          pass
       raise e
     finally:
-      Dcursor.close()
-      self.dbpool.put_connection(self.conn)
+      if cursor:
+        try:
+          cursor.close()
+        except:
+          pass
+      if conn:
+        try:
+          self.dbpool.put_connection(conn)
+        except:
+          pass
       
   #测试成功
   def close(self):
@@ -143,43 +181,63 @@ class main_thread:
       self.logging_path=logging_path
       self.max_retry_times=max_retry_times
     def __call__(self,future:Future[tuple[int,None|str]]):
-      try:
-        conn = self.dbpool.get_connection()
-      except Exception as e:
-        simple_log.log(str(e)+f' task{self.package['id']} get MySQL connection failed\nIn main_thread.callback',log_path=self.logging_path)
-        return
+      # 添加调试日志，确认回调函数被调用
+      simple_log.log(f'Callback started for task {self.package["id"]}', log_path=self.logging_path)
       
+      conn = None
+      cursor = None
       try:
-        result = future.result()
-      except Exception as e:
-        simple_log.log(str(e)+f' task{self.package['id']} execute function failed\nIn main_thread.callback',log_path=self.logging_path)
-        self.dbpool.put_connection(conn)
-        return
-      # 使用一个守护进程查看数据库中的积压未完成任务, 将积压任务设为失败状态
-      index = result[0] #返回任务id
-      msg = result[1] #返回错误信息, 在没有错误时, 信息为None
-      state = None
-      if msg is None:
-        state = 2
-      else:
-        state = 3
-      try:
+        # 检查Future状态
+        if future.cancelled():
+          simple_log.log(f'Task {self.package["id"]} was cancelled', log_path=self.logging_path)
+          return
+        
+        conn = self.dbpool.get_connection()
+        simple_log.log(f'Got database connection for task {self.package["id"]}', log_path=self.logging_path)
+        
+        # 获取任务结果
+        result = future.result(timeout=30)  # 设置超时
+        simple_log.log(f'Got result for task {self.package["id"]}: {result}', log_path=self.logging_path)
+        
+        # 处理结果
+        index = result[0] #返回任务id
+        msg = result[1] #返回错误信息, 在没有错误时, 信息为None
+        state = 2 if msg is None else 3
+        
+        # 更新数据库
         sql = 'update movie_agent_tasks set state = %s, progress = 100 where id = %s'
-        args = (state,index)
+        args = (state, index)
         
         cursor = conn.cursor()
-        res = retry_execute(cursor,self.logging_path,sql,args,self.max_retry_times)
+        res = retry_execute(cursor, self.logging_path, sql, args, self.max_retry_times)
+        
         if res == False:
           conn.rollback()
           raise Exception('Error in callback:retry_execute(sql,args) for updating state to 2 or 3')
         else:
           conn.commit()
+          simple_log.log(f'Successfully updated task {self.package["id"]} state to {state}', log_path=self.logging_path)
+          
       except Exception as e:
-        conn.rollback()
-        raise e
+        simple_log.log(f'Exception in callback for task {self.package["id"]}: {str(e)}', log_path=self.logging_path)
+        if conn:
+          try:
+            conn.rollback()
+          except:
+            pass
+        # 不要重新抛出异常，避免影响其他回调
       finally:
-        cursor.close()
-        self.dbpool.put_connection(conn)
+        if cursor:
+          try:
+            cursor.close()
+          except:
+            pass
+        if conn:
+          try:
+            self.dbpool.put_connection(conn)
+          except:
+            pass
+        simple_log.log(f'Callback completed for task {self.package["id"]}', log_path=self.logging_path)
   
   def add_output_path(self,args:dict[str,any]):
     pass
@@ -206,6 +264,7 @@ class main_thread:
             print('queue is empty, times:',times) #测试语句, 正式调试时删除
           
           print('after fetch_status0, times:',times) #测试语句, 正式调试时删除
+          futures = []  # 存储所有的Future对象
           while not self.queue.empty():
             print('into cycle, times:',times) #测试语句, 正式调试时删除
             '''
@@ -217,11 +276,26 @@ class main_thread:
             self.func接收参数为字典, 字典内容为{'id','task_uuid','prompt','width','height'}
             '''
             row = self.queue.get()
-            args = {'id':row['id'],'task_uuid':row['task_uuid'],'prompt':row['prompt'],'width':row['width'],'height':row['height'],'movie_agent_pack_id':row['movie_agent_pack_id']}
+            args = {'id':row['id'],'task_uuid':row['task_uuid'],'prompt':row['prompt'],'width':row['width'],'height':row['height']}
             # ,'movie_agent_pack_id':row['movie_agent_pack_id']
             self.add_output_path(args)
+            
+            # 提交任务到线程池
             future = executor.submit(self.func,args,self.dbpool)
-            future.add_done_callback(main_thread.callback(args,self.dbpool,self.logging_path))
+            futures.append(future)  # 保存Future对象
+            
+            # 添加回调函数
+            callback_obj = main_thread.callback(args,self.dbpool,self.logging_path)
+            future.add_done_callback(callback_obj)
+            
+            simple_log.log(f'Submitted task {args["id"]} to thread pool', log_path=self.logging_path)
+          
+          # 等待所有任务完成（可选，用于调试）
+          if futures:
+            simple_log.log(f'Waiting for {len(futures)} tasks to complete', log_path=self.logging_path)
+            # 注意：这里不等待完成，让任务在后台运行
+            # 如果需要等待，可以取消注释下面这行
+            # executor.shutdown(wait=True)
           print('queue size:',self.queue.qsize()) #测试语句, 正式调试时删除
     finally:
       self.close()
