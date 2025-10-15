@@ -9,6 +9,7 @@ import shutil
 import asyncio
 import logging
 import os
+import cv2
 def genVideo(package,dbpool):
     try:
         logging.basicConfig(level=logging.WARNING)
@@ -26,7 +27,7 @@ def genVideo(package,dbpool):
         with open(f".working_dir/{task_uuid}/prompt.txt", "r", encoding="utf-8") as f:
             prompt_d = f.read()
 
-        Pipeline(pack_id=package["pack_id"],prompt=prompt_d,task_uuid=task_uuid,output_path=output_path)
+        Pipeline(pack_id=package["movie_agent_pack_id"],prompt=prompt_d,task_uuid=task_uuid,output_path=output_path)
         return (id,None)
     except Exception as e:
         logging.error(f"发生异常： {e}")
@@ -51,10 +52,21 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
         )
         os.makedirs(f".working_dir/{task_uuid}/", exist_ok=True)
         video.save(f".working_dir/{task_uuid}/final_video.mp4")
-        cover_path = f".working_dir/{task_uuid}/final_video.mp4"
+        cap = cv2.VideoCapture(f".working_dir/{task_uuid}/final_video.mp4")
+        try:
+            ret, frame = cap.read()
+            if ret:
+                cv2.imwrite(f"{output_path}/0_first_frame.png",frame)
+                print("☑️ 封面已保存")
+            else:
+                print(" 封面保存失败")
+        except Exception as e:
+            logging.error(f"发生异常： {e}")
+
+        #cover_path = f".working_dir/{task_uuid}/first_frame.mp4"
         user_output_path = os.path.join(output_path,"final_video.mp4")
         shutil.copy2(f".working_dir/{task_uuid}/final_video.mp4",user_output_path)
-        shutil.copy2(cover_path,output_path)
+        #shutil.copy2(cover_path,output_path)
         print(f"☑️ Copy created in project root: {user_output_path}")
     elif(pack_id == 2):
         user_requirement = "真实电影风格，不要超过10句对话,一定要要保持人物一致性，参考生成的图片,面向短剧用户"
@@ -110,7 +122,7 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
                 working_dir=f".working_dir/{task_uuid}",
             )
             asyncio.run(
-                pipeline(idea=prompt, user_requirement=user_requirement, style=style)
+                pipeline(idea=prompt+"   the number of shots should not over 3", user_requirement=user_requirement, style=style)
             )
 
         user_output_path = os.path.join(output_path,"final_video.mp4")
