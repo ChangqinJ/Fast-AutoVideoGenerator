@@ -279,6 +279,7 @@ class Script2VideoPipeline:
                     prompt=prompt,
                     reference_image_paths=reference_image_paths,
                     size="900x1600",
+                    # size="1600x900",
                 )
                 ff_image.save(first_shot_ff_path)
                 self.frame_events[first_shot_idx]["first_frame"].set()
@@ -319,16 +320,16 @@ class Script2VideoPipeline:
                 normal_tasks.append(first_frame_task)
 
 
-            if shot_descriptions[shot_idx].variation_type in ["medium", "large"]:
-                last_frame_task = self.generate_frame_for_single_shot(
-                    shot_idx=shot_idx, 
-                    frame_type="last_frame", 
-                    first_shot_ff_path_and_text_pair=(first_shot_ff_path, shot_descriptions[first_shot_idx].ff_desc),
-                    frame_desc=shot_descriptions[shot_idx].lf_desc,
-                    visible_characters=[characters[idx] for idx in shot_descriptions[shot_idx].lf_vis_char_idxs],
-                    character_portraits_registry=character_portraits_registry,
-                )
-                normal_tasks.append(last_frame_task)
+            # if shot_descriptions[shot_idx].variation_type in ["medium", "large"]:
+            #     last_frame_task = self.generate_frame_for_single_shot(
+            #         shot_idx=shot_idx, 
+            #         frame_type="last_frame", 
+            #         first_shot_ff_path_and_text_pair=(first_shot_ff_path, shot_descriptions[first_shot_idx].ff_desc),
+            #         frame_desc=shot_descriptions[shot_idx].lf_desc,
+            #         visible_characters=[characters[idx] for idx in shot_descriptions[shot_idx].lf_vis_char_idxs],
+            #         character_portraits_registry=character_portraits_registry,
+            #     )
+            #     normal_tasks.append(last_frame_task)
 
 
         await asyncio.gather(*priority_tasks)
@@ -413,6 +414,7 @@ class Script2VideoPipeline:
                 prompt=prompt,
                 reference_image_paths=reference_image_paths,
                 size="900x1600",
+                # size="1600x900",
             )
             frame_image.save(frame_image_path)
             print(f"☑️ Generated {frame_type} frame for shot {shot_idx}, saved to {frame_image_path}.")
