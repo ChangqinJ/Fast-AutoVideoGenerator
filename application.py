@@ -99,7 +99,7 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
             )
         else:
             chat_model = init_chat_model(
-                model="gemini-pro-latest",
+                model="claude-sonnet-4-5-20250929",
                 api_key="sk-RsgJVQohu9e1HBMgdYsy9mQFKs3ue4fZXL2iGMjiiupiViQB",
                 base_url=r"https://yunwu.ai/v1",
                 model_provider="openai",
