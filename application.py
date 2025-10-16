@@ -26,8 +26,9 @@ def genVideo(package,dbpool):
 
         with open(f".working_dir/{task_uuid}/prompt.txt", "r", encoding="utf-8") as f:
             prompt_d = f.read()
+        pack_id=package["movie_agent_pack_id"]
         try:
-            Pipeline(pack_id=package["movie_agent_pack_id"],prompt=prompt_d,task_uuid=task_uuid,output_path=output_path)
+            Pipeline(pack_id=pack_id,prompt=prompt_d,task_uuid=task_uuid,output_path=output_path)
         except Exception as e:
             logging.error(f"发生异常: {e}")
             return (id, str(e))
