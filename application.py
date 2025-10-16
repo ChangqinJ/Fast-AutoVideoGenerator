@@ -73,7 +73,7 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
     elif(pack_id >= 2):
         user_requirement = "真实电影风格，不要超过10句对话,一定要要保持人物一致性，只要1个scene,参考生成的图片,面向短剧用户,the number of shots should not over 5!the number of shots should not over 5!the number of shots should not over 5!"
         style = "真实电影风格"
-        if(len(prompt) > 100):
+        if(len(prompt) > 30):
             print("Using Script to video")
             chat_model = init_chat_model(
                 model="claude-sonnet-4-5-20250929",  # claude-sonnet-4-5-20250929
