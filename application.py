@@ -72,8 +72,8 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
         #shutil.copy2(cover_path,output_path)
         print(f"☑️ Copy created in project root: {user_output_path}")
     elif(pack_id >= 2):
-        user_requirement = "真实电影风格，不要超过10句对话,一定要要保持人物一致性，只要1个scene,参考生成的图片,面向短剧用户,the number of shots should not over 5!the number of shots should not over 5!the number of shots should not over 5!"
-        style = "真实电影风格"
+        user_requirement = "电影风格，不要超过10句对话,一定要要保持人物一致性，只要1个scene,参考生成的图片,面向短剧用户,the number of shots should not over 5!the number of shots should not over 5!the number of shots should not over 5!"
+        style = "电影风格"
         if(len(prompt) > 30):
             print("Using Script to video")
             chat_model = init_chat_model(

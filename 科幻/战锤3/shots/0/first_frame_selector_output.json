@@ -1,0 +1,9 @@
+{
+    "reference_image_path_and_text_pairs": [
+        [
+            ".working_dir/科幻/战锤3/character_portraits/0_the lone soldier/back.png",
+            "A back view portrait of the lone soldier."
+        ]
+    ],
+    "text_prompt": "Create an image following the given description:\nA cinematic hyper-realistic shot from a shoulder-height rear-following perspective. In the center-left of the frame is the back view of a lone soldier wearing heavily damaged blue and gold armor with dents, scratches, and burn marks. He stands on stone stairs inside a Gothic fortress, facing forward and downward, ready to descend. The soldier's appearance should reference Image 0. The scene shows stone stairs extending forward and downward in the center, with weak overcast light filtering from above, dust particles visible in the air, damp moss-covered walls with water droplets, a dark corridor entrance in the right foreground, and low-lying mist around his feet. HDR cool-toned, desaturated blue-gray palette with dim lighting and medium contrast in photorealistic style."
+}

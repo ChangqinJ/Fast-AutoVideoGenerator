@@ -1,0 +1,16 @@
+{
+    "the lone soldier": {
+        "front": {
+            "path": ".working_dir/科幻/战锤3/character_portraits/0_the lone soldier/front.png",
+            "description": "A front view portrait of the lone soldier."
+        },
+        "side": {
+            "path": ".working_dir/科幻/战锤3/character_portraits/0_the lone soldier/side.png",
+            "description": "A side view portrait of the lone soldier."
+        },
+        "back": {
+            "path": ".working_dir/科幻/战锤3/character_portraits/0_the lone soldier/back.png",
+            "description": "A back view portrait of the lone soldier."
+        }
+    }
+}

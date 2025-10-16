@@ -1,0 +1,13 @@
+[
+    {
+        "idx": 0,
+        "active_shot_idxs": [
+            0
+        ],
+        "parent_cam_idx": null,
+        "parent_shot_idx": null,
+        "reason": null,
+        "is_parent_fully_covers_child": null,
+        "missing_info": null
+    }
+]

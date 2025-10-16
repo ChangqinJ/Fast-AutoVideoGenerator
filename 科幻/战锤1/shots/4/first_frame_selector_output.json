@@ -1,0 +1,9 @@
+{
+    "reference_image_path_and_text_pairs": [
+        [
+            ".working_dir/科幻/战锤1/shots/4/new_camera_4.png",
+            "The composition and background are correct but some elements may be wrong. The wrong elements should be replaced.\nWrong elements: 堡垒墙体的清晰细节,包括墙体上明显的战争痕迹、斑驳破损的具体纹理,以及更近距离观察到的建筑结构细节.\nYou must select this image as the main reference and replace the characters in the image with the provided character portraits. Don't change the background."
+        ]
+    ],
+    "text_prompt": "Create an image following the given description:\n远景广角镜头。画面展现哥特式堡垒墙位于画面中后方位置,高耸入雾中的天空。墙体应呈现模糊、柔化的视觉效果,避免清晰的战争痕迹细节、斑驳破损的具体纹理和近距离建筑结构细节。前景是大量的残骸和泥泞地面。整个画面被浓雾包围,能见度有限。灰烬在空中飘落。整体色调极度去饱和,几乎接近黑白,只保留微弱的冷蓝色调。光线昏暗,对比度柔和,呈现完全的战后废土氛围。\n\nThe overall composition, background structure, fog atmosphere, and color tone should reference Image 0. However, the fortress walls should appear more blurred and softened, reducing clear details of war damage, mottled textures, and close-up architectural details."
+}

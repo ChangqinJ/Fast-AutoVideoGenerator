@@ -1,0 +1,16 @@
+{
+    "孤独的士兵": {
+        "front": {
+            "path": ".working_dir/科幻/战锤2/character_portraits/0_孤独的士兵/front.png",
+            "description": "A front view portrait of 孤独的士兵."
+        },
+        "side": {
+            "path": ".working_dir/科幻/战锤2/character_portraits/0_孤独的士兵/side.png",
+            "description": "A side view portrait of 孤独的士兵."
+        },
+        "back": {
+            "path": ".working_dir/科幻/战锤2/character_portraits/0_孤独的士兵/back.png",
+            "description": "A back view portrait of 孤独的士兵."
+        }
+    }
+}

@@ -1,0 +1,57 @@
+[
+    {
+        "idx": 0,
+        "active_shot_idxs": [
+            0
+        ],
+        "parent_cam_idx": null,
+        "parent_shot_idx": null,
+        "reason": null,
+        "is_parent_fully_covers_child": null,
+        "missing_info": null
+    },
+    {
+        "idx": 1,
+        "active_shot_idxs": [
+            1
+        ],
+        "parent_cam_idx": 0,
+        "parent_shot_idx": 0,
+        "reason": "父镜头是超广角低角度镜头，中景部分包含了更多残骸和石块，其视野范围覆盖了子镜头中景聚焦的倒塌盔甲和盾牌区域。从超广角到中景的过渡符合镜头尺寸递进原则。",
+        "is_parent_fully_covers_child": true,
+        "missing_info": null
+    },
+    {
+        "idx": 2,
+        "active_shot_idxs": [
+            2
+        ],
+        "parent_cam_idx": 1,
+        "parent_shot_idx": 1,
+        "reason": "父镜头的中景包含了散落的盔甲、盾牌等装备细节,其视野范围覆盖了子镜头特写的战靴及周围散落装备。从中景到特写的过渡符合景别递进逻辑,且两个镜头在时间上紧密相邻。",
+        "is_parent_fully_covers_child": true,
+        "missing_info": null
+    },
+    {
+        "idx": 3,
+        "active_shot_idxs": [
+            3
+        ],
+        "parent_cam_idx": 0,
+        "parent_shot_idx": 0,
+        "reason": "父镜头的超广角视野从前景废墟延伸至远景堡垒,完整覆盖了子镜头中远景展现的旗帜、废墟到堡垒墙的纵深空间。从超广角到中远景的过渡合理,父镜头提供了更宏观的空间背景。",
+        "is_parent_fully_covers_child": true,
+        "missing_info": null
+    },
+    {
+        "idx": 4,
+        "active_shot_idxs": [
+            4
+        ],
+        "parent_cam_idx": 0,
+        "parent_shot_idx": 0,
+        "reason": "父镜头的超广角远景已经展现了哥特式堡垒墙在浓雾中的轮廓,子镜头是向堡垒墙推进后的更近距离远景广角。父镜头的视野范围包含了子镜头所展现的堡垒墙区域,从超广角低角度到远景广角的推进符合空间连续性。",
+        "is_parent_fully_covers_child": false,
+        "missing_info": "堡垒墙体的清晰细节,包括墙体上明显的战争痕迹、斑驳破损的具体纹理,以及更近距离观察到的建筑结构细节"
+    }
+]
