@@ -99,6 +99,7 @@ class main_thread:
     try:
       # 每次获取新的连接，避免事务状态问题
       conn = self.dbpool.get_connection()
+      conn.begin()
       cursor = conn.cursor()
       
       # 设置事务隔离级别为READ COMMITTED，确保能看到其他事务已提交的数据
@@ -113,13 +114,15 @@ class main_thread:
       WHERE state = 0 
       ORDER BY id 
       LIMIT %s 
-      FOR UPDATE SKIP LOCKED
       '''
       args = (ub,)
       
       status = retry_execute(cursor, self.logging_path, sql, args, self.max_retry_times)
       if status == False:
-        raise Exception('Error in fetch_status0:retry_execute(sql,args) for finding rows with state=0')
+        raise Exception("""
+                        Error in fetch_status0:retry_execute(sql,args) 
+                        for finding rows with state=0
+                        """)
       
       rows = list(cursor.fetchall())
       print('--------------------------------------------------------rows size:',len(rows))
@@ -276,7 +279,7 @@ class main_thread:
             self.func接收参数为字典, 字典内容为{'id','task_uuid','prompt','width','height'}
             '''
             row = self.queue.get()
-            args = {'id':row['id'],'task_uuid':row['task_uuid'],'prompt':row['prompt'],'width':row['width'],'height':row['height'],'movie_agent_pack_id':row['movie_agent_pack_id']}
+            args = {'id':row['id'],'task_uuid':row['task_uuid'],'prompt':row['prompt'],'width':row['width'],'height':row['height']}
             # ,'movie_agent_pack_id':row['movie_agent_pack_id']
             self.add_output_path(args)
             
