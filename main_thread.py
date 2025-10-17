@@ -279,7 +279,7 @@ class main_thread:
             self.func接收参数为字典, 字典内容为{'id','task_uuid','prompt','width','height'}
             '''
             row = self.queue.get()
-            args = {'id':row['id'],'task_uuid':row['task_uuid'],'prompt':row['prompt'],'width':row['width'],'height':row['height']}
+            args = {'id':row['id'],'task_uuid':row['task_uuid'],'prompt':row['prompt'],'width':row['width'],'height':row['height'],'movie_agent_pack_id':row['movie_agent_pack_id']}
             # ,'movie_agent_pack_id':row['movie_agent_pack_id']
             self.add_output_path(args)
             
