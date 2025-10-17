@@ -19,6 +19,12 @@ def genVideo(package,dbpool):
         height = package["height"]
         id = package["id"]
         os.makedirs(f".working_dir/{task_uuid}", exist_ok=True)
+
+        error_log_path = "genVideoLog.txt"
+        file_handler = logging.FileHandler(error_log_path,encoding='uyf-8')
+        logger = logging.getLogger()
+        logger.addHandler(file_handler)
+
         output_path = package["output_path"]+f"/{task_uuid}"
         os.makedirs(output_path, exist_ok=True)
         with open(f".working_dir/{task_uuid}/prompt.txt", "w", encoding="utf-8") as f:
@@ -28,17 +34,17 @@ def genVideo(package,dbpool):
             prompt_d = f.read()
         pack_id=package["movie_agent_pack_id"]
         try:
-            Pipeline(pack_id=pack_id,prompt=prompt_d,task_uuid=task_uuid,output_path=output_path)
+            Pipeline(pack_id=pack_id,prompt=prompt_d,task_uuid=task_uuid,output_path=output_path,logger=logger)
         except Exception as e:
-            logging.error(f"发生异常: {e}")
+            logger.error(f"发生异常: {e}")
             return (id, str(e))
         return (id,None)
     except Exception as e:
-        logging.error(f"发生异常： {e}")
+        logger.error(f"发生异常： {e}")
         return (id, str(e))
 
 
-def Pipeline(pack_id,prompt,task_uuid,output_path):
+def Pipeline(pack_id,prompt,task_uuid,output_path,logger):
     if(pack_id == 1):
         video_generator = VeoVideoGenerator(
             api_key="sk-RsgJVQohu9e1HBMgdYsy9mQFKs3ue4fZXL2iGMjiiupiViQB",
@@ -64,7 +70,7 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
             else:
                 print(" 封面保存失败")
         except Exception as e:
-            logging.error(f"发生异常： {e}")
+            logger.error(f"发生异常： {e}")
 
         #cover_path = f".working_dir/{task_uuid}/first_frame.mp4"
         user_output_path = os.path.join(output_path,"final_video.mp4")
@@ -72,9 +78,9 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
         #shutil.copy2(cover_path,output_path)
         print(f"☑️ Copy created in project root: {user_output_path}")
     elif(pack_id >= 2):
-        user_requirement = "真实电影风格，不要超过10句对话,一定要要保持人物一致性，只要1个scene,参考生成的图片,面向短剧用户,the number of shots should not over 5!the number of shots should not over 5!the number of shots should not over 5!"
+        user_requirement = "真实电影风格，不要超过10句对话,一定要要保持人物一致性，只要1个scene,参考生成的图片,面向短剧用户,the number of shots should not over 10!the number of shots should not over 10!the number of shots should not over 10!"
         style = "真实电影风格"
-        if(len(prompt) > 30):
+        if(len(prompt) > 200):
             print("Using Script to video")
             chat_model = init_chat_model(
                 model="claude-sonnet-4-5-20250929",  # claude-sonnet-4-5-20250929
