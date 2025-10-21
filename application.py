@@ -5,6 +5,7 @@ from tools.image_generator.doubao_seedream import DoubaoSeedreamImageGenerator
 from tools.image_generator.gemini import GeminiImageGenerator
 from tools.video_generator.veo import VeoVideoGenerator
 from tools.video_generator.doubao_seedance import DoubaoSeedanceVideoGenerator
+from tools.video_generator.sora import SoraVideoGenerator
 import shutil
 import asyncio
 import logging
@@ -85,7 +86,7 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
             image_generator = DoubaoSeedreamImageGenerator(
                 api_key="sk-RsgJVQohu9e1HBMgdYsy9mQFKs3ue4fZXL2iGMjiiupiViQB",
             )
-            video_generator = VeoVideoGenerator(
+            video_generator = DoubaoSeedanceVideoGenerator(
                 api_key="sk-RsgJVQohu9e1HBMgdYsy9mQFKs3ue4fZXL2iGMjiiupiViQB",
             )
             pipeline = Script2VideoPipeline(
@@ -122,7 +123,7 @@ def Pipeline(pack_id,prompt,task_uuid,output_path):
                 # api_version="v1beta",
                 # model="gemini-2.5-flash-image-preview",
             )
-            video_generator = VeoVideoGenerator(
+            video_generator = DoubaoSeedanceVideoGenerator(
                 api_key="sk-RsgJVQohu9e1HBMgdYsy9mQFKs3ue4fZXL2iGMjiiupiViQB",
             )
             pipeline = Idea2VideoPipeline(

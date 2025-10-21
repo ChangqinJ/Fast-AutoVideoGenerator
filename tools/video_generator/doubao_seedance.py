@@ -14,7 +14,7 @@ class DoubaoSeedanceVideoGenerator(BaseVideoGenerator):
         self,
         api_key: str,
         t2v_model: str = "doubao-seedance-1-0-lite-t2v-250428",
-        ff2v_model: str = "doubao-seedance-1-0-lite-i2v-250428",
+        ff2v_model: str = "doubao-seedance-1-0-pro-250528",
         flf2v_model: str = "doubao-seedance-1-0-lite-i2v-250428",
     ):
         self.api_key = api_key
@@ -44,7 +44,7 @@ class DoubaoSeedanceVideoGenerator(BaseVideoGenerator):
         content = [
             {
                 "type": "text",
-                "text": prompt + " --rs 720p --rt adaptive --dur 10  --fps 16  --wm false --seed -1  --cf false"
+                "text": prompt + " --rs 720p --rt 9:16 --ratio 9:16 --dur 10  --fps 16  --wm false --seed -1  --cf false"
             },
             {
                 "type": "image_url",

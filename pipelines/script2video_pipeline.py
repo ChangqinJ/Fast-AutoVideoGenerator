@@ -294,16 +294,16 @@ class Script2VideoPipeline:
         priority_tasks = []
         normal_tasks = []
 
-        # if shot_descriptions[first_shot_idx].variation_type in ["medium", "large"]:
-        #     task = self.generate_frame_for_single_shot(
-        #         shot_idx=first_shot_idx, 
-        #         frame_type="last_frame", 
-        #         first_shot_ff_path_and_text_pair=(first_shot_ff_path, shot_descriptions[first_shot_idx].ff_desc),
-        #         frame_desc=shot_descriptions[first_shot_idx].lf_desc,
-        #         visible_characters=[characters[idx] for idx in shot_descriptions[first_shot_idx].lf_vis_char_idxs],
-        #         character_portraits_registry=character_portraits_registry,
-        #     )
-        #     normal_tasks.append(task)
+        if shot_descriptions[first_shot_idx].variation_type in ["medium", "large"]:
+            task = self.generate_frame_for_single_shot(
+                shot_idx=first_shot_idx, 
+                frame_type="last_frame", 
+                first_shot_ff_path_and_text_pair=(first_shot_ff_path, shot_descriptions[first_shot_idx].ff_desc),
+                frame_desc=shot_descriptions[first_shot_idx].lf_desc,
+                visible_characters=[characters[idx] for idx in shot_descriptions[first_shot_idx].lf_vis_char_idxs],
+                character_portraits_registry=character_portraits_registry,
+            )
+            normal_tasks.append(task)
 
         for shot_idx in camera.active_shot_idxs[1:]:
             first_frame_task = self.generate_frame_for_single_shot(
@@ -320,16 +320,16 @@ class Script2VideoPipeline:
                 normal_tasks.append(first_frame_task)
 
 
-            # if shot_descriptions[shot_idx].variation_type in ["medium", "large"]:
-            #     last_frame_task = self.generate_frame_for_single_shot(
-            #         shot_idx=shot_idx, 
-            #         frame_type="last_frame", 
-            #         first_shot_ff_path_and_text_pair=(first_shot_ff_path, shot_descriptions[first_shot_idx].ff_desc),
-            #         frame_desc=shot_descriptions[shot_idx].lf_desc,
-            #         visible_characters=[characters[idx] for idx in shot_descriptions[shot_idx].lf_vis_char_idxs],
-            #         character_portraits_registry=character_portraits_registry,
-            #     )
-            #     normal_tasks.append(last_frame_task)
+            if shot_descriptions[shot_idx].variation_type in ["medium", "large"]:
+                last_frame_task = self.generate_frame_for_single_shot(
+                    shot_idx=shot_idx, 
+                    frame_type="last_frame", 
+                    first_shot_ff_path_and_text_pair=(first_shot_ff_path, shot_descriptions[first_shot_idx].ff_desc),
+                    frame_desc=shot_descriptions[shot_idx].lf_desc,
+                    visible_characters=[characters[idx] for idx in shot_descriptions[shot_idx].lf_vis_char_idxs],
+                    character_portraits_registry=character_portraits_registry,
+                )
+                normal_tasks.append(last_frame_task)
 
 
         await asyncio.gather(*priority_tasks)
@@ -346,13 +346,13 @@ class Script2VideoPipeline:
             print(f"🚀 Skipped generating video for shot {shot_description.idx}, already exists.")
         else:
             await self.frame_events[shot_description.idx]["first_frame"].wait()
-            # if shot_description.variation_type in ["medium", "large"]:
-            #     await self.frame_events[shot_description.idx]["last_frame"].wait()
+            if shot_description.variation_type in ["medium", "large"]:
+                await self.frame_events[shot_description.idx]["last_frame"].wait()
 
             frame_paths = []
             frame_paths.append(os.path.join(self.working_dir, "shots", f"{shot_description.idx}", "first_frame.png"))
-            # if shot_description.variation_type in ["medium", "large"]:
-            #     frame_paths.append(os.path.join(self.working_dir, "shots", f"{shot_description.idx}", "last_frame.png"))
+            if shot_description.variation_type in ["medium", "large"]:
+                frame_paths.append(os.path.join(self.working_dir, "shots", f"{shot_description.idx}", "last_frame.png"))
 
             print(f"🎬 Starting video generation for shot {shot_description.idx}...")
             video_output = await self.video_generator.generate_single_video(
