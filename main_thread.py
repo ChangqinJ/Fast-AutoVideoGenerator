@@ -13,22 +13,27 @@ import read_config
 
 def retry(conn:pymysql.Connection,max_retry_times:int=5):
   status = False
+  error = None
   for i in range(max_retry_times):
     try:
       conn.ping(reconnect=True)
     except pymysql.err.OperationalError as errOpt:
+      error = errOpt
       print(f'OperationalError {errOpt}! Retry failed, retrying times: {i}')
       time.sleep(1)
     except pymysql.err.Error as err:
+      error = err
       print(f'MySQL Error {err}! Retry failed, retrying times: {i}')
       time.sleep(1)
     except Exception as e:
+      error = e
       print(f'Unknown exception {e}! Retry failed, retrying times: {i}')
       time.sleep(1)
     else:
       status = True
+      error = None
       break
-  return status
+  return status, error
 
 def retry_execute(cursor:DictCursor,logging_path:str,sql:str,args:tuple=None,max_retry_times:int=5):
   status = False
@@ -36,24 +41,35 @@ def retry_execute(cursor:DictCursor,logging_path:str,sql:str,args:tuple=None,max
     try:
       cursor.execute(sql,args) #执行弹出异常
     except (pymysql.err.InterfaceError,pymysql.err.OperationalError) as e:
-      if e.args[0] in (0,2003,2006,2013):
-        if retry(cursor.connection,max_retry_times=max_retry_times) == True:
+      result = retry(cursor.connection,max_retry_times=max_retry_times)
+      if result[0] == True:
           #连接异常且重试成功
           simple_log.log(f'Retry success, retrying times: {i}\nIn main_thread.retry_execute',log_path=logging_path)
-          continue
-        else:
-          simple_log.log(f'Retry failed, error:{e}, retrying times: {i}\nIn main_thread.retry_execute',log_path=logging_path)
-          continue
+          break
       else:
-        simple_log.log(f"Exception {e}! Retry failed, retrying times: {i}\nIn main_thread.retry_execute",log_path=logging_path)
-        continue
+          simple_log.log(f'Retry failed for{str(result[1])}, error:{e}, retrying times: {i}\nIn main_thread.retry_execute',log_path=logging_path)
+          continue
     except Exception as e:
       simple_log.log(f'Other exception {e}! Retry failed, retrying times: {i}\nIn main_thread.retry_execute',log_path=logging_path)
-      continue
+      result = retry(cursor.connection,max_retry_times=max_retry_times)
+      if result[0] == True:
+        simple_log.log(f'Retry success, retrying times: {i}\nIn main_thread.retry_execute',log_path=logging_path)
+        break
+      else:
+        simple_log.log(f'Retry failed for{str(result[1])}, error:{e}, retrying times: {i}\nIn main_thread.retry_execute',log_path=logging_path)
+        continue
     else:
       status = True
       break
   return status
+
+def retry_conn(conn:pymysql.Connection,max_retry_times:int=5):
+  '''
+  对连接进行重试
+  '''
+  status = False
+  error = None
+  
 
 class main_thread:
   # 连接测试成功
@@ -99,16 +115,20 @@ class main_thread:
     try:
       # 每次获取新的连接，避免事务状态问题
       conn = self.dbpool.get_connection()
-      conn.begin()
+      status, error = retry_execute(conn,self.logging_path,"BEGIN",None,self.max_retry_times)
       cursor = conn.cursor()
       
       # 设置事务隔离级别为READ COMMITTED，确保能看到其他事务已提交的数据
-      cursor.execute("SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED")
+      status = retry_execute(cursor, self.logging_path, "SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED", None, self.max_retry_times)
+      if status == False:
+        simple_log.log("""
+                        Error in fetch_status0:retry_execute(sql,args) 
+                        for setting transaction isolation level to READ COMMITTED
+                        """,log_path=self.logging_path)
+        conn.rollback()
+        raise Exception("Error in fetch_status0:retry_execute(sql,args) for setting transaction isolation level to READ COMMITTED")
       
       #弱点: 不熟悉数据库的事务和锁机制
-      
-      # 使用原子操作：先更新再查询，避免竞态条件
-      # 使用FOR UPDATE SKIP LOCKED来避免锁定冲突
       sql = '''
       SELECT * FROM movie_agent_tasks 
       WHERE state = 0 
@@ -119,11 +139,14 @@ class main_thread:
       
       status = retry_execute(cursor, self.logging_path, sql, args, self.max_retry_times)
       if status == False:
+        simple_log.log("""
+                        Error in fetch_status0:retry_execute(sql,args) 
+                        for finding rows with state=0
+                        """,log_path=self.logging_path)
         raise Exception("""
                         Error in fetch_status0:retry_execute(sql,args) 
                         for finding rows with state=0
-                        """)
-      
+                        """)      
       rows = list(cursor.fetchall())
       print('--------------------------------------------------------rows size:',len(rows))
       
@@ -279,8 +302,7 @@ class main_thread:
             self.func接收参数为字典, 字典内容为{'id','task_uuid','prompt','width','height'}
             '''
             row = self.queue.get()
-            args = {'id':row['id'],'task_uuid':row['task_uuid'],'prompt':row['prompt'],'width':row['width'],'height':row['height'],'movie_agent_pack_id':row['movie_agent_pack_id']}
-            # ,'movie_agent_pack_id':row['movie_agent_pack_id']
+            args = {'id':row['id'],'task_uuid':row['task_uuid'],'prompt':row['prompt'],'width':row['width'],'height':row['height'],'movie_agent_pack_id':row['movie_agent_pack_id'],'retry_times':row['retry_times']}
             self.add_output_path(args)
             
             # 提交任务到线程池
